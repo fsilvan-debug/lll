@@ -1,26 +1,30 @@
+
 import { GoogleGenAI } from "@google/genai";
 
 export const askAboutPlanet = async (planetName: string, question: string) => {
-  // Use the key injected by Vite from process.env
+  // המפתח נמשך אוטומטית ממשתני הסביבה (Environment Variables)
   const apiKey = process.env.API_KEY;
   
-  if (!apiKey || apiKey === "undefined" || apiKey === "") {
-    return "המפתח (API_KEY) לא הוגדר. יש להוסיף אותו ב-Vercel Settings ולבצע Redeploy.";
+  if (!apiKey || apiKey === "undefined") {
+    return "המפתח (API_KEY) לא הוגדר כראוי ב-Vercel. יש להגדיר אותו ב-Settings -> Environment Variables ולבצע Redeploy.";
   }
 
   try {
     const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `You are a planetary scientist expert. Answer about ${planetName} in Hebrew. Question: ${question}`,
+      contents: `You are a planetary scientist expert. The user is exploring a solar system simulation.
+      The planet being discussed is: ${planetName}.
+      Answer the following question in Hebrew concisely (max 3 sentences): ${question}`,
       config: {
-        systemInstruction: "ענה בעברית בלבד. היה מדויק מדעית. תשובות קצרות וקולעות.",
+        systemInstruction: "ענה בעברית בלבד. היה מדויק מדעית. אם השאלה היא על סדרי גודל, השתמש בדוגמאות מחיי היום יום.",
         temperature: 0.7,
       }
     });
-    return response.text || "לא הצלחתי לקבל תשובה.";
+    
+    return response.text || "מצטער, לא הצלחתי למצוא תשובה כרגע.";
   } catch (error: any) {
     console.error("Gemini API Error:", error);
-    return "שגיאה בחיבור לבינה המלאכותית. וודאו שהמפתח ב-Vercel הוגדר כראוי.";
+    return "חלה שגיאה בחיבור לבינה המלאכותית. ודאו שהמפתח הוגדר כראוי ב-Vercel (חובה לעשות Redeploy אחרי הגדרת המפתח).";
   }
 };

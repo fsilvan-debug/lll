@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { PLANETS, SUN } from './constants';
 import { PlanetData } from './types';
@@ -23,20 +24,18 @@ const SolarSystemView: React.FC<SolarSystemViewProps> = ({
     const ratio = diameter / earthDiameter;
     
     if (scaleMode) {
-      // Realistic Scale: Earth is tiny (4px). Jupiter is bigger (44px). Sun is massive.
-      if (diameter > 1000000) return 600; // Sun limited to 600px for screen space
-      return Math.max(2, ratio * 4);
+      if (diameter > 1000000) return isMobile ? 400 : 700; // Sun massive in scale mode
+      return Math.max(2, ratio * 6); // Earth is 6px baseline
     }
     
-    // Schematic Mode (Default)
     if (diameter > 1000000) return isMobile ? 80 : 130; 
     const baseSize = diameter / 4000;
     return Math.max(12, Math.min(baseSize, 50));
   };
 
   const sunSize = getScaleSize(SUN.realSize);
-  const baseRadius = scaleMode ? 400 : (isMobile ? 80 : 120);
-  const radiusStep = scaleMode ? 150 : (isMobile ? 40 : 80);
+  const baseRadius = scaleMode ? 500 : (isMobile ? 80 : 120);
+  const radiusStep = scaleMode ? 250 : (isMobile ? 40 : 80);
 
   return (
     <div className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_center,_#0f172a_0%,_#020617_100%)]">
@@ -44,12 +43,12 @@ const SolarSystemView: React.FC<SolarSystemViewProps> = ({
         @keyframes self-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .planet-spin { animation: self-rotate 25s linear infinite; }
         .pause-animation { animation-play-state: paused !important; }
-        .transition-all-custom { transition: all 1.2s cubic-bezier(0.23, 1, 0.32, 1); }
+        .transition-all-custom { transition: all 1.5s cubic-bezier(0.19, 1, 0.22, 1); }
       `}</style>
       
       {/* Moving stars background */}
-      <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden">
-        {[...Array(150)].map((_, i) => (
+      <div className="absolute inset-0 opacity-40 pointer-events-none">
+        {[...Array(200)].map((_, i) => (
           <div 
             key={i}
             className="absolute bg-white rounded-full animate-pulse"
@@ -59,36 +58,40 @@ const SolarSystemView: React.FC<SolarSystemViewProps> = ({
               top: Math.random() * 100 + '%',
               left: Math.random() * 100 + '%',
               animationDelay: `${Math.random() * 5}s`,
-              opacity: Math.random() * 0.7 + 0.3
             }}
           />
         ))}
       </div>
 
       {/* Sun */}
-      <button 
-        onClick={() => onPlanetSelect(SUN)}
-        className="relative z-30 transition-all-custom group focus:outline-none flex items-center justify-center"
+      <div 
+        className="absolute transition-all-custom flex items-center justify-center"
         style={{ 
           width: sunSize, 
           height: sunSize,
-          transform: selectedPlanetId === 'sun' ? 'scale(1.05)' : 'scale(1)'
+          left: scaleMode ? `-${sunSize * 0.7}px` : 'auto', // Push sun to left in scale mode to see orbits better
         }}
       >
-        <div className={`absolute inset-0 rounded-full bg-orange-500/30 blur-[60px] transition-all duration-1000 ${selectedPlanetId === 'sun' ? 'opacity-100 scale-150' : 'opacity-60 scale-110'}`}></div>
-        <div className="relative w-full h-full bg-gradient-to-tr from-yellow-300 via-orange-500 to-red-600 rounded-full shadow-[0_0_80px_rgba(249,115,22,0.6)] border-4 border-yellow-200/20">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-50">
-          <span className="text-black font-black text-sm bg-white/90 px-4 py-1 rounded-full shadow-2xl">השמש</span>
-        </div>
-      </button>
+        <button 
+          onClick={() => onPlanetSelect(SUN)}
+          className="relative w-full h-full rounded-full transition-all group focus:outline-none"
+        >
+          <div className="absolute inset-0 rounded-full bg-orange-600/20 blur-[100px] animate-pulse"></div>
+          <div className="relative w-full h-full bg-gradient-to-tr from-yellow-300 via-orange-500 to-red-600 rounded-full shadow-[0_0_120px_rgba(249,115,22,0.4)] border-4 border-yellow-100/10"></div>
+          {scaleMode && (
+            <div className="absolute top-1/2 left-[110%] -translate-y-1/2 whitespace-nowrap bg-black/60 backdrop-blur px-4 py-2 rounded-xl border border-yellow-500/30 text-yellow-200 text-sm font-bold">
+              השמש: גדולה פי 109 מכדור הארץ
+            </div>
+          )}
+        </button>
+      </div>
 
       {/* Planets and Orbits */}
       {PLANETS.map((planet, index) => {
         const orbitRadius = baseRadius + (index + 1) * radiusStep;
         const isSelected = selectedPlanetId === planet.id;
         const displaySize = getScaleSize(planet.realSize);
+        const orbitOffset = scaleMode ? -sunSize * 0.7 : 0;
 
         return (
           <div
@@ -97,12 +100,13 @@ const SolarSystemView: React.FC<SolarSystemViewProps> = ({
             style={{
               width: `${orbitRadius * 2}px`,
               height: `${orbitRadius * 2}px`,
+              transform: `translateX(${orbitOffset}px)`,
             }}
           >
             <div 
               className={`w-full h-full relative ${animationEnabled ? '' : 'pause-animation'}`}
               style={{
-                animation: `rotate-belt ${40 / planet.orbitalSpeed}s linear infinite`,
+                animation: `rotate-belt ${60 / planet.orbitalSpeed}s linear infinite`,
               }}
             >
               <button
@@ -120,16 +124,11 @@ const SolarSystemView: React.FC<SolarSystemViewProps> = ({
                   boxShadow: isSelected ? `0 0 25px ${planet.color}` : 'none'
                 }}
               >
-                {(planet.id === 'saturn' || planet.id === 'uranus') && (
-                   <div 
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-white/20 rounded-full pointer-events-none" 
-                    style={{
-                      width: `${displaySize * 2.4}px`,
-                      height: `${displaySize * 0.7}px`,
-                      transform: `translate(-50%, -50%) rotate(${planet.id === 'uranus' ? '80deg' : '20deg'})`,
-                      background: 'radial-gradient(ellipse at center, transparent 40%, rgba(255,255,255,0.15) 100%)'
-                    }}
-                   />
+                {/* Scale Comparison Tooltip (Automatic for some planets) */}
+                {scaleMode && (planet.id === 'earth' || planet.id === 'jupiter') && (
+                  <div className="absolute bottom-[120%] left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20 text-[10px] text-white whitespace-nowrap animate-bounce">
+                    {planet.id === 'earth' ? 'נקודת ייחוס 📍' : '1,300 כדורי ארץ נכנסים כאן!'}
+                  </div>
                 )}
 
                 <div className={`absolute -bottom-12 left-1/2 -translate-x-1/2 text-xs font-bold text-white bg-slate-900/90 px-3 py-1 rounded-lg border border-white/10 transition-all whitespace-nowrap shadow-xl ${isSelected ? 'opacity-100 scale-110' : 'opacity-0 group-hover:opacity-100'}`}>
@@ -144,12 +143,6 @@ const SolarSystemView: React.FC<SolarSystemViewProps> = ({
       <style>{`
         @keyframes rotate-belt { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
-      
-      {scaleMode && (
-        <div className="absolute top-24 left-1/2 -translate-x-1/2 bg-blue-600/20 backdrop-blur-md px-6 py-2 rounded-full border border-blue-500/30 text-blue-200 text-sm font-bold animate-pulse pointer-events-none">
-          מצב סדר גודל מציאותי: כדור הארץ קטן פי 100 מהשמש!
-        </div>
-      )}
     </div>
   );
 };
