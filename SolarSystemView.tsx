@@ -24,39 +24,46 @@ const SolarSystemView: React.FC<SolarSystemViewProps> = ({
     const ratio = diameter / earthDiameter;
     
     if (scaleMode) {
-      if (diameter > 1000000) return isMobile ? 350 : 650; // שמש דומיננטית
-      return Math.max(2, ratio * 6); // כדור הארץ בגודל 6px
+      if (diameter > 1000000) return isMobile ? 350 : 650; 
+      return Math.max(3, ratio * 7); // כדור הארץ בערך 7 פיקסלים
     }
     
-    if (diameter > 1000000) return isMobile ? 90 : 140; 
+    if (diameter > 1000000) return isMobile ? 90 : 150; 
     const baseSize = diameter / 4000;
-    return Math.max(14, Math.min(baseSize, 55));
+    return Math.max(16, Math.min(baseSize, 60));
   };
 
   const sunSize = getScaleSize(SUN.realSize);
-  const baseRadius = scaleMode ? 480 : (isMobile ? 80 : 130);
-  const radiusStep = scaleMode ? 160 : (isMobile ? 45 : 85);
+  const baseRadius = scaleMode ? 500 : (isMobile ? 80 : 140);
+  const radiusStep = scaleMode ? 180 : (isMobile ? 45 : 90);
 
   return (
     <div className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-[#020617]">
       <style>{`
         @keyframes self-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .planet-spin { animation: self-rotate 30s linear infinite; }
+        .planet-spin { animation: self-rotate 40s linear infinite; }
         .pause-animation { animation-play-state: paused !important; }
-        .transition-fast { transition: all 1.2s cubic-bezier(0.19, 1, 0.22, 1); }
+        .transition-galaxy { transition: all 1.5s cubic-bezier(0.22, 1, 0.36, 1); }
       `}</style>
       
-      {/* Background Stars */}
+      {/* רקע כוכבים עשיר יותר */}
       <div className="absolute inset-0 opacity-40 pointer-events-none">
         {[...Array(200)].map((_, i) => (
           <div key={i} className="absolute bg-white rounded-full animate-pulse"
-            style={{ width: Math.random() * 2 + 'px', height: Math.random() * 2 + 'px', top: Math.random() * 100 + '%', left: Math.random() * 100 + '%', animationDelay: `${Math.random() * 5}s` }}
+            style={{ 
+              width: (Math.random() * 2 + 1) + 'px', 
+              height: (Math.random() * 2 + 1) + 'px', 
+              top: Math.random() * 100 + '%', 
+              left: Math.random() * 100 + '%', 
+              animationDelay: `${Math.random() * 5}s`,
+              opacity: Math.random()
+            }}
           />
         ))}
       </div>
 
-      {/* The Sun */}
-      <div className="absolute transition-fast flex items-center justify-center" 
+      {/* השמש */}
+      <div className="absolute transition-galaxy flex items-center justify-center" 
         style={{ 
           width: sunSize, 
           height: sunSize, 
@@ -64,18 +71,21 @@ const SolarSystemView: React.FC<SolarSystemViewProps> = ({
           zIndex: 10
         }}
       >
-        <button onClick={() => onPlanetSelect(SUN)} className="relative w-full h-full rounded-full group focus:outline-none">
-          <div className="absolute inset-0 rounded-full bg-orange-600/30 blur-[100px] animate-pulse"></div>
-          <div className="relative w-full h-full bg-gradient-to-tr from-yellow-300 via-orange-500 to-red-600 rounded-full shadow-2xl border-4 border-yellow-200/10"></div>
+        <button 
+          onClick={() => onPlanetSelect(SUN)} 
+          className="relative w-full h-full rounded-full group focus:outline-none transition-transform hover:scale-105"
+        >
+          <div className="absolute inset-0 rounded-full bg-orange-600/30 blur-[120px] animate-pulse"></div>
+          <div className="relative w-full h-full bg-gradient-to-tr from-yellow-300 via-orange-500 to-red-600 rounded-full shadow-[0_0_80px_rgba(234,179,8,0.4)] border-4 border-yellow-200/10"></div>
           {scaleMode && (
-            <div className="absolute top-1/2 left-[110%] -translate-y-1/2 bg-black/60 backdrop-blur px-5 py-2 rounded-2xl border border-yellow-500/40 text-yellow-100 text-sm font-black whitespace-nowrap shadow-xl">
+            <div className="absolute top-1/2 left-[110%] -translate-y-1/2 bg-black/60 backdrop-blur px-5 py-2 rounded-2xl border border-yellow-500/40 text-yellow-100 text-sm font-black whitespace-nowrap shadow-xl animate-in fade-in slide-in-from-left-4">
               השמש: גדולה פי 109 מכדור הארץ ☀️
             </div>
           )}
         </button>
       </div>
 
-      {/* Orbits and Planets */}
+      {/* מסלולים ופלנטות */}
       {PLANETS.map((planet, index) => {
         const orbitRadius = baseRadius + (index + 1) * radiusStep;
         const isSelected = selectedPlanetId === planet.id;
@@ -84,7 +94,7 @@ const SolarSystemView: React.FC<SolarSystemViewProps> = ({
 
         return (
           <div key={planet.id} 
-            className={`absolute border rounded-full transition-fast pointer-events-none ${isSelected ? 'border-blue-400/60 border-2 z-40 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-white/5'}`}
+            className={`absolute border rounded-full transition-galaxy pointer-events-none ${isSelected ? 'border-blue-400/70 border-2 z-40' : 'border-white/5'}`}
             style={{ 
               width: `${orbitRadius * 2}px`, 
               height: `${orbitRadius * 2}px`, 
@@ -92,9 +102,9 @@ const SolarSystemView: React.FC<SolarSystemViewProps> = ({
             }}
           >
             <div className={`w-full h-full relative ${animationEnabled ? '' : 'pause-animation'}`}
-              style={{ animation: `rotate-belt ${60 / planet.orbitalSpeed}s linear infinite` }}>
+              style={{ animation: `rotate-belt ${80 / planet.orbitalSpeed}s linear infinite` }}>
               <button onClick={() => onPlanetSelect(planet)}
-                className={`absolute pointer-events-auto rounded-full transition-fast hover:scale-150 focus:outline-none group planet-spin ${animationEnabled ? '' : 'pause-animation'} ${isSelected ? 'ring-4 ring-white shadow-2xl z-50' : 'z-20'}`}
+                className={`absolute pointer-events-auto rounded-full transition-galaxy hover:scale-150 focus:outline-none group planet-spin ${animationEnabled ? '' : 'pause-animation'} ${isSelected ? 'ring-4 ring-white shadow-2xl z-50' : 'z-20'}`}
                 style={{ 
                   width: `${displaySize}px`, 
                   height: `${displaySize}px`, 

@@ -20,7 +20,7 @@ export const SUN: PlanetData = {
   humanReached: false,
   explorationTools: 'SOHO, Parker Solar Probe',
   temperature: '5,500°C (פנים: 15 מיליון מעלות)',
-  imageUrl: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e000790/GSFC_20171208_Archive_e000790~thumb.jpg',
+  imageUrl: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e000790/GSFC_20171208_Archive_e000790~orig.jpg',
   description: 'הכוכב המרכזי שסביבו הכל מסתובב. השמש מהווה 99.8% ממסת מערכת השמש כולה!'
 };
 
@@ -43,7 +43,7 @@ export const PLANETS: PlanetData[] = [
     humanReached: false,
     explorationTools: 'MESSENGER, BepiColombo',
     temperature: `${LRM}-173°C עד 427°C`,
-    imageUrl: 'https://images-assets.nasa.gov/image/PIA15162/PIA15162~thumb.jpg',
+    imageUrl: 'https://images-assets.nasa.gov/image/PIA15162/PIA15162~orig.jpg',
     description: 'הפלנטה הקטנה והקרובה ביותר לשמש. אין לו אטמוספירה שתשמור על החום, ולכן ההבדלים בין יום ללילה קיצוניים.'
   },
   {
@@ -64,7 +64,7 @@ export const PLANETS: PlanetData[] = [
     humanReached: false,
     explorationTools: 'Venera, Magellan, Akatsuki',
     temperature: '462°C (חממה לוהטת)',
-    imageUrl: 'https://images-assets.nasa.gov/image/PIA00271/PIA00271~thumb.jpg',
+    imageUrl: 'https://images-assets.nasa.gov/image/PIA00271/PIA00271~orig.jpg',
     description: 'התאום הלוהט של כדור הארץ. הלחץ על פני השטח חזק פי 90 מהלחץ אצלנו - כמו להיות קילומטר מתחת למים.'
   },
   {
@@ -86,7 +86,7 @@ export const PLANETS: PlanetData[] = [
     humanReached: true,
     explorationTools: 'לוויינים, תחנת החלל הבינלאומית',
     temperature: `${LRM}-88°C עד 58°C`,
-    imageUrl: 'https://images-assets.nasa.gov/image/PIA00122/PIA00122~thumb.jpg',
+    imageUrl: 'https://images-assets.nasa.gov/image/AS17-148-22727/AS17-148-22727~orig.jpg',
     description: 'הבית שלנו. הפלנטה היחידה המוכרת המאפשרת קיום חיים בזכות המרחק המדויק מהשמש ואטמוספירה מגנה.'
   },
   {
@@ -108,7 +108,7 @@ export const PLANETS: PlanetData[] = [
     humanReached: false,
     explorationTools: 'Perseverance, Curiosity, Insight',
     temperature: `${LRM}-153°C עד 20°C`,
-    imageUrl: 'https://images-assets.nasa.gov/image/PIA02653/PIA02653~thumb.jpg',
+    imageUrl: 'https://images-assets.nasa.gov/image/PIA02653/PIA02653~orig.jpg',
     description: 'הכוכב האדום. בעבר היו בו נהרות ואגמים, וכיום הוא היעד המרכזי למחקר עתידי של התיישבות אנושית.'
   },
   {
@@ -130,7 +130,7 @@ export const PLANETS: PlanetData[] = [
     humanReached: false,
     explorationTools: 'Juno, Galileo, Voyager',
     temperature: `${LRM}-110°C`,
-    imageUrl: 'https://images-assets.nasa.gov/image/PIA04866/PIA04866~thumb.jpg',
+    imageUrl: 'https://images-assets.nasa.gov/image/PIA04866/PIA04866~orig.jpg',
     description: 'מלך כוכבי הלכת. הוא כל כך גדול שכל שאר הפלנטות יכולות להיכנס בתוכו פעמיים!'
   },
   {
@@ -152,7 +152,7 @@ export const PLANETS: PlanetData[] = [
     humanReached: false,
     explorationTools: 'Cassini-Huygens, Voyager',
     temperature: `${LRM}-140°C`,
-    imageUrl: 'https://images-assets.nasa.gov/image/PIA01364/PIA01364~thumb.jpg',
+    imageUrl: 'https://images-assets.nasa.gov/image/PIA01364/PIA01364~orig.jpg',
     description: 'מפורסם בטבעות המרהיבות שלו. אם היה אמבטיה מספיק גדולה, שבתאי היה צף בה כי הוא פחות צפוף ממים.'
   },
   {
@@ -174,7 +174,7 @@ export const PLANETS: PlanetData[] = [
     humanReached: false,
     explorationTools: 'Voyager 2, JWST',
     temperature: `${LRM}-195°C`,
-    imageUrl: 'https://images-assets.nasa.gov/image/PIA26221/PIA26221~thumb.jpg',
+    imageUrl: 'https://images-assets.nasa.gov/image/PIA00032/PIA00032~orig.jpg',
     description: 'ענק הקרח השוכב על צידו. הוא מסתובב בזווית של 98 מעלות, מה שיוצר עונות שנה קיצוניות שנמשכות עשורים.'
   },
   {
@@ -196,7 +196,7 @@ export const PLANETS: PlanetData[] = [
     humanReached: false,
     explorationTools: 'Voyager 2',
     temperature: `${LRM}-201°C`,
-    imageUrl: 'https://images-assets.nasa.gov/image/PIA01492/PIA01492~thumb.jpg',
+    imageUrl: 'https://images-assets.nasa.gov/image/PIA01492/PIA01492~orig.jpg',
     description: 'הפלנטה הרחוקה ביותר. נושבות בה הרוחות החזקות ביותר במערכת השמש, שמגיעות למהירות של 2,100 קמ"ש.'
   },
   {
@@ -218,7 +218,7 @@ export const PLANETS: PlanetData[] = [
     humanReached: false,
     explorationTools: 'New Horizons',
     temperature: `${LRM}-225°C`,
-    imageUrl: 'https://images-assets.nasa.gov/image/PIA19952/PIA19952~thumb.jpg',
+    imageUrl: 'https://images-assets.nasa.gov/image/PIA19952/PIA19952~orig.jpg',
     description: 'הפלנטה הננסית האהובה. ב-2006 הוא "הורד בדרגה" אך נותר אחד העולמות המרתקים ביותר בקצה המערכת.'
   }
 ];
