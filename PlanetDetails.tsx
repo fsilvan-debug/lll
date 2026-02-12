@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import { PlanetData } from './types';
 import { PLANETS, SUN } from './constants';
 
@@ -9,21 +10,33 @@ interface PlanetDetailsProps {
 }
 
 const PlanetDetails: React.FC<PlanetDetailsProps> = ({ planet, onClose, onNavigate }) => {
+  const [compareId, setCompareId] = useState<string>('earth');
+  const [imageError, setImageError] = useState(false);
+
+  // אפס את מצב השגיאה כשעוברים פלנטה
+  React.useEffect(() => {
+    setImageError(false);
+  }, [planet.id]);
+
   const allBodies = [SUN, ...PLANETS];
   const currentIndex = allBodies.findIndex(p => p.id === planet.id);
   const nextBody = allBodies[(currentIndex + 1) % allBodies.length];
   const prevBody = allBodies[(currentIndex - 1 + allBodies.length) % allBodies.length];
 
-  // חישוב יחס גודל לכדור הארץ להמחשה ויזואלית
-  const sizeComparison = useMemo(() => {
-    if (planet.id === 'sun') return 'השמש גדולה פי 109 מכדור הארץ';
+  const comparisonBody = allBodies.find(p => p.id === compareId) || allBodies.find(p => p.id === 'earth')!;
+
+  const sizeRatio = useMemo(() => {
     const pSize = parseInt(planet.realSize.replace(/,/g, ''));
-    const earthSize = 12742;
-    const ratio = pSize / earthSize;
-    return ratio > 1 
-      ? `גדול פי ${ratio.toFixed(1)} מכדור הארץ` 
-      : `קטן פי ${(1/ratio).toFixed(1)} מכדור הארץ`;
-  }, [planet]);
+    const cSize = parseInt(comparisonBody.realSize.replace(/,/g, ''));
+    return pSize / cSize;
+  }, [planet, comparisonBody]);
+
+  const sizeComparisonText = useMemo(() => {
+    if (sizeRatio === 1) return 'זהים בגודלם';
+    return sizeRatio > 1 
+      ? `${planet.name} גדול פי ${sizeRatio.toFixed(1)} מ${comparisonBody.name}` 
+      : `${planet.name} קטן פי ${(1/sizeRatio).toFixed(1)} מ${comparisonBody.name}`;
+  }, [planet, comparisonBody, sizeRatio]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-6 pointer-events-none overflow-y-auto">
@@ -31,28 +44,20 @@ const PlanetDetails: React.FC<PlanetDetailsProps> = ({ planet, onClose, onNaviga
       
       <div className="relative w-full max-w-6xl bg-slate-900 border border-slate-700/50 rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col md:flex-row pointer-events-auto max-h-[95vh] my-auto">
         
-        {/* כפתורי ניווט צדדיים (דסקטופ) */}
+        {/* כפתורי ניווט */}
         <div className="hidden md:flex absolute inset-y-0 left-0 right-0 justify-between items-center px-4 pointer-events-none z-30">
-          <button 
-            onClick={() => onNavigate(prevBody)} 
-            className="pointer-events-auto p-4 bg-white/5 hover:bg-blue-600 rounded-full text-white transition-all hover:-translate-x-2 border border-white/10 shadow-lg backdrop-blur-sm"
-            title={`הקודם: ${prevBody.name}`}
-          >
+          <button onClick={() => onNavigate(prevBody)} className="pointer-events-auto p-4 bg-white/5 hover:bg-blue-600 rounded-full text-white transition-all hover:-translate-x-2 border border-white/10 shadow-lg backdrop-blur-sm">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
           </button>
-          <button 
-            onClick={() => onNavigate(nextBody)} 
-            className="pointer-events-auto p-4 bg-white/5 hover:bg-blue-600 rounded-full text-white transition-all hover:translate-x-2 border border-white/10 shadow-lg backdrop-blur-sm"
-            title={`הבא: ${nextBody.name}`}
-          >
+          <button onClick={() => onNavigate(nextBody)} className="pointer-events-auto p-4 bg-white/5 hover:bg-blue-600 rounded-full text-white transition-all hover:translate-x-2 border border-white/10 shadow-lg backdrop-blur-sm">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
           </button>
         </div>
 
-        {/* תוכן - צד ימין (טקסט) */}
+        {/* תוכן */}
         <div className="flex-1 p-6 md:p-10 overflow-y-auto order-2 md:order-1 scrollbar-hide text-right">
           <div className="flex justify-between items-start mb-6">
-            <div className="animate-in slide-in-from-right duration-500">
+            <div>
               <h2 className="text-4xl md:text-6xl font-black text-white">{planet.name}</h2>
               <p className="text-blue-400 font-mono text-lg uppercase tracking-widest opacity-70">{planet.englishName}</p>
             </div>
@@ -65,20 +70,50 @@ const PlanetDetails: React.FC<PlanetDetailsProps> = ({ planet, onClose, onNaviga
             <p className="text-white text-xl md:text-2xl leading-relaxed italic">"{planet.description}"</p>
           </div>
 
-          {/* המחשת סדר גודל מהירה */}
-          <div className="mb-8 p-5 bg-slate-800/40 rounded-2xl border border-white/5 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-               <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]">ארץ</div>
-               <div className="text-slate-400 text-2xl">↔</div>
-               <div className="w-14 h-14 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-xl" style={{ backgroundColor: planet.color }}>{planet.name}</div>
-            </div>
-            <div className="text-left">
-              <p className="text-blue-300 font-bold text-lg">{sizeComparison}</p>
-              <p className="text-slate-500 text-xs">קוטר: {planet.realSize}</p>
+          {/* כלי השוואה ויזואלי */}
+          <div className="mb-8 p-6 bg-slate-800/40 rounded-3xl border border-white/5">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-6">
+                 <div className="flex items-end gap-3 h-20 items-center">
+                    <div 
+                      className="rounded-full shadow-lg transition-all duration-700" 
+                      style={{ 
+                        width: sizeRatio > 1 ? '60px' : `${60 * sizeRatio}px`,
+                        height: sizeRatio > 1 ? '60px' : `${60 * sizeRatio}px`,
+                        backgroundColor: planet.color 
+                      }} 
+                    />
+                    <div className="text-slate-500 text-xl font-black">מול</div>
+                    <div 
+                      className="rounded-full shadow-lg border border-white/20 transition-all duration-700" 
+                      style={{ 
+                        width: sizeRatio < 1 ? '60px' : `${60 / sizeRatio}px`,
+                        height: sizeRatio < 1 ? '60px' : `${60 / sizeRatio}px`,
+                        backgroundColor: comparisonBody.color 
+                      }} 
+                    />
+                 </div>
+                 
+                 <div className="flex flex-col">
+                   <label className="text-[10px] text-slate-500 font-bold uppercase mb-1">השווה עם:</label>
+                   <select 
+                      value={compareId} 
+                      onChange={(e) => setCompareId(e.target.value)}
+                      className="bg-slate-900 border border-blue-500/30 rounded-xl px-4 py-2 text-white text-sm focus:outline-none"
+                    >
+                      {allBodies.map(b => (
+                        <option key={b.id} value={b.id}>{b.name}</option>
+                      ))}
+                    </select>
+                 </div>
+              </div>
+              <div className="text-center md:text-left flex-1">
+                <p className="text-blue-300 font-black text-xl md:text-2xl">{sizeComparisonText}</p>
+                <p className="text-slate-500 text-sm mt-1">קוטר: {planet.realSize} לעומת {comparisonBody.realSize}</p>
+              </div>
             </div>
           </div>
 
-          {/* כרטיסי מידע מורחבים - כל המידע המדעי */}
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             <InfoCard label="טמפרטורה" value={planet.temperature} icon="🌡️" color="text-orange-400" />
             <InfoCard label="מרחק מהשמש" value={planet.distanceFromSun} icon="☀️" color="text-yellow-400" />
@@ -91,29 +126,29 @@ const PlanetDetails: React.FC<PlanetDetailsProps> = ({ planet, onClose, onNaviga
             <InfoCard label="אטמוספירה" value={planet.atmosphere} icon="🌬️" color="text-slate-300" span />
           </div>
 
-          {/* ניווט מהיר לנייד */}
           <div className="md:hidden flex justify-between gap-3 mt-4">
-             <button onClick={() => onNavigate(prevBody)} className="flex-1 bg-slate-800 py-4 rounded-2xl text-white font-bold flex items-center justify-center gap-2 border border-white/5 shadow-lg active:scale-95 transition-transform">
-               <span>←</span> {prevBody.name}
-             </button>
-             <button onClick={() => onNavigate(nextBody)} className="flex-1 bg-slate-800 py-4 rounded-2xl text-white font-bold flex items-center justify-center gap-2 border border-white/5 shadow-lg active:scale-95 transition-transform">
-               {nextBody.name} <span>→</span>
-             </button>
+             <button onClick={() => onNavigate(prevBody)} className="flex-1 bg-slate-800 py-4 rounded-2xl text-white font-bold">← {prevBody.name}</button>
+             <button onClick={() => onNavigate(nextBody)} className="flex-1 bg-slate-800 py-4 rounded-2xl text-white font-bold">{nextBody.name} →</button>
           </div>
         </div>
 
-        {/* ויזואליה - צד שמאל (תמונה) */}
-        <div className="w-full md:w-[450px] h-[300px] md:h-auto shrink-0 bg-black relative order-1 md:order-2 overflow-hidden border-b md:border-b-0 md:border-r border-white/10">
-          <img 
-            src={planet.imageUrl} 
-            alt={planet.name} 
-            key={planet.id} 
-            className="w-full h-full object-cover opacity-90 transition-transform duration-[30s] hover:scale-125 animate-in fade-in zoom-in duration-1000" 
-          />
+        {/* תמונה בצד עם מנגנון הגנה */}
+        <div className="w-full md:w-[450px] h-[300px] md:h-auto shrink-0 bg-black relative order-1 md:order-2 overflow-hidden border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center">
+          {!imageError ? (
+            <img 
+              src={planet.imageUrl} 
+              alt={planet.name} 
+              key={planet.id} 
+              className="w-full h-full object-cover opacity-90 transition-transform duration-[30s] hover:scale-125"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center" style={{ background: `radial-gradient(circle at center, ${planet.color}44 0%, #000 100%)` }}>
+              <div className="w-48 h-48 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.1)] mb-4 animate-pulse" style={{ backgroundColor: planet.color, backgroundImage: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent)' }} />
+              <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">{planet.name}</p>
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
-          <div className="absolute bottom-6 left-6 text-left opacity-50">
-             <p className="text-[10px] text-white font-mono uppercase tracking-widest">Planetary Visualization System v2.0</p>
-          </div>
         </div>
       </div>
     </div>
@@ -121,7 +156,7 @@ const PlanetDetails: React.FC<PlanetDetailsProps> = ({ planet, onClose, onNaviga
 };
 
 const InfoCard = ({ label, value, subValue, icon, color, span }: { label: string, value: string, subValue?: string, icon: string, color: string, span?: boolean }) => (
-  <div className={`bg-slate-800/40 p-5 rounded-2xl border border-white/5 hover:bg-slate-800 transition-all shadow-lg flex flex-col justify-center ${span ? 'col-span-2 lg:col-span-3' : ''}`}>
+  <div className={`bg-slate-800/40 p-5 rounded-2xl border border-white/5 shadow-lg flex flex-col justify-center ${span ? 'col-span-2 lg:col-span-3' : ''}`}>
     <div className="flex items-center gap-3 mb-1">
       <span className="text-2xl">{icon}</span>
       <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{label}</span>
